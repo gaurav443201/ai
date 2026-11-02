@@ -1,65 +1,46 @@
+from collections import deque
 
-# BFS for Blocks World Problem
+start = {"A": "T", "B": "T", "C": "A"}
+goal = {"A": "B", "B": "C", "C": "T"}
 
-start = (('A', 'C'), ('B',))
-goal = (('C', 'B', 'A'),)
-
-queue = [[start, []]]
+queue = deque([(start, [])])
 visited = [start]
 
-while len(queue) > 0:
+while queue:
+    state, path = queue.popleft()
 
-    state, path = queue.pop(0)
-
-    # Check goal state
     if state == goal:
         print("Goal State Reached!")
-        print("Steps:")
-
         for move in path:
             print(move)
-
         print("Total Moves:", len(path))
         break
 
-    # Generate new states
-    for i in range(len(state)):
+    for block in state:
+        # Check if block is clear
+        if block in state.values():
+            continue
 
-        # Take the top block
-        block = state[i][-1]
+        for dest in ["T", "A", "B", "C"]:
+            if dest == block:
+                continue
 
-        # Remove the top block
-        new_state = list(state)
-        new_state[i] = state[i][:-1]
+            # Destination must be clear
+            if dest != "T" and dest in state.values():
+                continue
 
-        if new_state[i] == ():
-            new_state.pop(i)
+            new = state.copy()
+            new[block] = dest
 
-        # Move block to the table
-        table_state = tuple(sorted(new_state + [(block,)]))
+            if new not in visited:
+                visited.append(new)
 
-        if table_state not in visited:
-            visited.append(table_state)
+                if dest == "T":
+                    move = "Move " + block + " to Table"
+                else:
+                    move = "Move " + block + " onto " + dest
 
-            new_path = path + ["Move " + block + " to table"]
-            queue.append([table_state, new_path])
-
-        # Move block onto another stack
-        for j in range(len(new_state)):
-
-            temp = new_state[:]
-            temp[j] = temp[j] + (block,)
-
-            next_state = tuple(sorted(temp))
-
-            if next_state not in visited:
-                visited.append(next_state)
-
-                new_path = path + [
-                    "Move " + block + " onto " + temp[j][-2]
-                ]
-
-                queue.append([next_state, new_path])
+                queue.append((new, path + [move]))
 
 else:
     print("No solution found!")
